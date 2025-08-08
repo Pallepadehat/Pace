@@ -31,6 +31,7 @@ struct SettingsView: View {
                                     if newValue {
                                         Task { await healthKitManager.requestAuthorization() }
                                     }
+                                    persist()
                                 }
                             )) {
                                 Text("Enable Health Access")
@@ -53,6 +54,7 @@ struct SettingsView: View {
                                 set: { newValue in
                                     settings.dailyStepGoal = max(1000, min(newValue, 50000))
                                     if settings.hapticsEnabled { Haptics.playSuccess() }
+                                    persist()
                                 }
                             ), in: 1000...50000, step: 500) {
                                 HStack {
@@ -67,7 +69,7 @@ struct SettingsView: View {
                         Section(header: Text("Units")) {
                             Picker("Distance unit", selection: Binding(
                                 get: { settings.distanceUnit },
-                                set: { settings.distanceUnit = $0 }
+                                set: { settings.distanceUnit = $0; persist() }
                             )) {
                                 ForEach(AppSettings.DistanceUnit.allCases) { unit in
                                     Text(unit.displayName).tag(unit)
@@ -78,19 +80,19 @@ struct SettingsView: View {
                         Section(header: Text("Experience")) {
                             Toggle("Animations", isOn: Binding(
                                 get: { settings.animationsEnabled },
-                                set: { settings.animationsEnabled = $0 }
+                                set: { settings.animationsEnabled = $0; persist() }
                             ))
                             Toggle("Haptics", isOn: Binding(
                                 get: { settings.hapticsEnabled },
-                                set: { settings.hapticsEnabled = $0 }
+                                set: { settings.hapticsEnabled = $0; persist() }
                             ))
                             Toggle("Dynamic background", isOn: Binding(
                                 get: { settings.dynamicBackgroundEnabled },
-                                set: { settings.dynamicBackgroundEnabled = $0 }
+                                set: { settings.dynamicBackgroundEnabled = $0; persist() }
                             ))
                             Toggle("Ambient edge progress", isOn: Binding(
                                 get: { settings.ambientEdgeProgressEnabled },
-                                set: { settings.ambientEdgeProgressEnabled = $0 }
+                                set: { settings.ambientEdgeProgressEnabled = $0; persist() }
                             ))
                         }
 
@@ -101,7 +103,7 @@ struct SettingsView: View {
                                     withAnimation(.easeInOut(duration: 0.35)) {
                                         settings.accentTheme = newTheme
                                     }
-                                    try? modelContext.save()
+                                    persist()
                                 }
                             )) {
                                 ForEach(AppSettings.ThemeColor.allCases) { theme in
@@ -194,6 +196,10 @@ struct SettingsView: View {
         } else {
             SKStoreReviewController.requestReview()
         }
+    }
+
+    private func persist() {
+        do { try modelContext.save() } catch { }
     }
 
     private var bundleVersionText: String {
