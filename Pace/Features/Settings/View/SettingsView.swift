@@ -61,6 +61,7 @@ struct SettingsView: View {
                                     Text("Daily step goal")
                                     Spacer()
                                     Text("\(settings.dailyStepGoal.formatted()) steps")
+                                        .contentTransition(.numericText(value: Double(settings.dailyStepGoal)))
                                         .font(.headline)
                                 }
                             }
