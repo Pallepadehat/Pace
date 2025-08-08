@@ -24,20 +24,42 @@ struct GlassCard<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .glassBackgroundEffect()
+            let cornerRadius: CGFloat = 28
+            let baseShape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+
+            baseShape
+                .glassEffect(in: .rect)
+                .clipShape(baseShape)
+                // Subtle hairline
                 .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+                    baseShape
+                        .inset(by: 0.5)
+                        .stroke(Color.white.opacity(0.06), lineWidth: 1)
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .strokeBorder(LinearGradient(colors: [Color.white.opacity(0.25), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
-                        .blendMode(.plusLighter)
-                )
-                .background(ProgressGlow(progress: progress, color: accent))
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                // Progress stroke on top
+                .overlay(alignment: .center) {
+                    let lineWidth: CGFloat = 6
+                    baseShape
+                        .inset(by: lineWidth / 2)
+                        .trim(from: 0, to: max(0.001, min(progress, 0.999)))
+                        .stroke(
+                            AngularGradient(
+                                gradient: Gradient(colors: [accent.opacity(0.95), accent.opacity(0.55), accent.opacity(0.95)]),
+                                center: .center
+                            ),
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+                        .shadow(color: accent.opacity(0.45), radius: 12, x: 0, y: 0)
+                        .animation(.easeInOut(duration: 0.4), value: progress)
+                }
+                // Soft outer glow for depth
+                .overlay {
+                    baseShape
+                        .stroke(accent.opacity(0.10), lineWidth: 10)
+                        .blur(radius: 14)
+                        .opacity(min(1, Double(progress)))
+                }
 
             Button(action: { Task { await refresh() } }) {
                 Image(systemName: "arrow.clockwise")
@@ -45,10 +67,14 @@ struct GlassCard<Content: View>: View {
                     .padding(16)
             }
         }
-        .overlay(
-            content()
-                .padding(28)
-        )
+        .overlay(alignment: .center) {
+            // Use fixed layout to avoid jumping when content changes
+            ZStack(alignment: .center) {
+                content()
+                    .padding(28)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
         .padding(.horizontal)
         .frame(maxWidth: .infinity)
         .frame(height: 360)

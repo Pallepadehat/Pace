@@ -23,41 +23,49 @@ struct HomeView: View {
                     progress: viewModel.progressFraction(goal: currentGoal),
                     isLoading: viewModel.isLoading
                 ) {
-                    if viewModel.isLoading {
-                        CardSkeleton()
-                    } else {
-                        VStack(spacing: 8) {
-                            Text(viewModel.selectedDayFormatted)
-                                .font(.title.weight(.bold))
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                            Text(viewModel.stepsToday.formatted())
-                                .font(.system(size: 64, weight: .bold, design: .rounded))
-                                .monospacedDigit()
-                                .contentTransition(.numericText(value: Double(viewModel.stepsToday)))
-                            Text("steps")
-                                .font(.title2)
-                                .foregroundStyle(.secondary)
-                            Text(viewModel.distanceString(unit: settingsList.first?.distanceUnit ?? .metric))
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                        }
+                    VStack(spacing: 8) {
+                        Text(viewModel.selectedDayFormatted)
+                            .font(.title.weight(.bold))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Text(viewModel.stepsToday.formatted())
+                            .font(.system(size: 64, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .contentTransition(.numericText(value: Double(viewModel.stepsToday)))
+                            .animation(.easeInOut(duration: 0.3), value: viewModel.stepsToday)
+                            .redacted(reason: viewModel.isLoading ? .placeholder : [])
+                        Text("steps")
+                            .font(.title2)
+                            .foregroundStyle(.secondary)
+                        Text(viewModel.distanceString(unit: settingsList.first?.distanceUnit ?? .metric))
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                            .redacted(reason: viewModel.isLoading ? .placeholder : [])
                     }
                 } refresh: {
                     await viewModel.refresh()
                 }
 
-                if viewModel.isLoading {
-                    ChartSkeleton()
-                } else {
+                ZStack {
                     HourlyChart(data: viewModel.hourlySteps)
+                        .opacity(viewModel.isLoading ? 0.35 : 1)
+                    if viewModel.isLoading {
+                        ChartSkeleton()
+                            .transition(.opacity)
+                    }
                 }
 
-                if viewModel.isLoading {
-                    DayScrollerSkeleton()
-                } else {
+                ZStack {
                     DayScroller(days: viewModel.last7Days, selected: $viewModel.selectedDate) { date in
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            viewModel.selectedDate = date
+                        }
                         Task { await viewModel.refresh(for: date) }
+                    }
+                    .opacity(viewModel.isLoading ? 0.35 : 1)
+                    if viewModel.isLoading {
+                        DayScrollerSkeleton()
+                            .transition(.opacity)
                     }
                 }
             }

@@ -60,9 +60,10 @@ final class HomeViewModel: ObservableObject {
             distanceTodayMeters = d
             hourlySteps = h.map { HourPoint(date: $0.0, steps: $0.1) }
             last7Days = last.map { DayPoint(date: $0.0, steps: $0.1) }
-            isLoading = false
+            // Smoothly mark loading false to reduce jump
+            withAnimation(.easeInOut(duration: 0.2)) { isLoading = false }
         } catch {
-            isLoading = false
+            withAnimation(.easeInOut(duration: 0.2)) { isLoading = false }
         }
     }
 }
