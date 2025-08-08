@@ -17,6 +17,7 @@ struct LiquidGlass: ViewModifier {
                 ZStack {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(.ultraThinMaterial)
+                        .glassBackgroundEffect()
                         .overlay(
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                                 .strokeBorder(LinearGradient(colors: [Color.white.opacity(0.35), Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
@@ -41,6 +42,14 @@ extension View {
         background(
             LinearGradient(colors: [Color.blue.opacity(0.15), Color.purple.opacity(0.15)], startPoint: .topLeading, endPoint: .bottomTrailing)
         )
+    }
+
+    // Explicit glass effect when needed
+    func glassBackgroundEffect() -> some View {
+        self.background(.ultraThinMaterial)
+            .overlay(
+                LinearGradient(colors: [Color.white.opacity(0.06), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing)
+            )
     }
 }
 

@@ -62,7 +62,9 @@ final class HealthKitManager: ObservableObject {
         guard let type = HKObjectType.quantityType(forIdentifier: .stepCount) else { return [] }
         let interval = DateComponents(hour: 1)
         let anchor = date.startOfDay
-        let predicate = HKQuery.predicateForSamples(withStart: date.startOfDay, end: date.endOfDay, options: [.strictStartDate])
+        let start = date.startOfDay
+        let end = date.endOfDay
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [.strictStartDate])
 
         return try await withCheckedThrowingContinuation { continuation in
             let query = HKStatisticsCollectionQuery(quantityType: type, quantitySamplePredicate: predicate, options: .cumulativeSum, anchorDate: anchor, intervalComponents: interval)
@@ -70,7 +72,7 @@ final class HealthKitManager: ObservableObject {
                 if let error { return continuation.resume(throwing: error) }
                 guard let collection else { return continuation.resume(returning: []) }
                 var results: [(Date, Int)] = []
-                collection.enumerateStatistics(from: date.startOfDay, to: date.endOfDay) { stats, _ in
+                collection.enumerateStatistics(from: start, to: end) { stats, _ in
                     let value = stats.sumQuantity()?.doubleValue(for: .count()) ?? 0
                     results.append((stats.startDate, Int(value)))
                 }
@@ -82,8 +84,9 @@ final class HealthKitManager: ObservableObject {
 
     func fetchDailySteps(forLast days: Int) async throws -> [(Date, Int)] {
         guard let type = HKObjectType.quantityType(forIdentifier: .stepCount) else { return [] }
+        let todayStart = Date().startOfDay
         let end = Date().endOfDay
-        let start = Calendar.current.date(byAdding: .day, value: -days + 1, to: Date().startOfDay) ?? Date().startOfDay
+        let start = Calendar.current.date(byAdding: .day, value: -days + 1, to: todayStart) ?? todayStart
         let interval = DateComponents(day: 1)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [.strictStartDate])
 
