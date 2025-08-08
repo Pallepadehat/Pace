@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var settingsList: [AppSettings]
     @State private var isShowingSettings = false
 
     var body: some View {
@@ -23,10 +26,7 @@ struct HomeView: View {
                     .animation(.easeInOut(duration: 0.4), value: 0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                LinearGradient(colors: [.blue.opacity(0.12), .purple.opacity(0.12)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .ignoresSafeArea()
-            )
+            .background(gradientBackground)
             .navigationTitle("Steps")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -41,6 +41,16 @@ struct HomeView: View {
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()
         }
+    }
+
+    @Environment(\.colorScheme) private var colorScheme
+    private var gradientBackground: some View {
+        let theme = settingsList.first?.accentTheme ?? .blue
+        let colors = theme.gradientColors(for: colorScheme)
+        let themeKey = theme.rawValue + (colorScheme == .dark ? "_d" : "_l")
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+            .ignoresSafeArea()
+            .animation(.easeInOut(duration: 0.35), value: themeKey)
     }
 }
 

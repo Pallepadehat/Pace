@@ -97,7 +97,11 @@ struct SettingsView: View {
                         Section(header: Text("Theme")) {
                             Picker("Accent color", selection: Binding(
                                 get: { settings.accentTheme },
-                                set: { settings.accentTheme = $0 }
+                                set: { newTheme in
+                                    withAnimation(.easeInOut(duration: 0.35)) {
+                                        settings.accentTheme = newTheme
+                                    }
+                                }
                             )) {
                                 ForEach(AppSettings.ThemeColor.allCases) { theme in
                                     HStack {
@@ -120,11 +124,21 @@ struct SettingsView: View {
                         }
 
                         Section(header: Text("Support")) {
-                            Button("Terms of Service") { openURLString("https://yourdomain.example/terms") }
-                            Button("Privacy Policy") { openURLString("https://yourdomain.example/privacy") }
-                            Button("Report a Bug") { openURLString("https://yourdomain.example/support/bug") }
-                            Button("Request a Feature") { openURLString("https://yourdomain.example/support/feature") }
-                            Button("Leave a Review") { requestReview() }
+                            LabeledButton(title: "Terms of Service", systemImage: "doc.text") {
+                                openURLString("https://yourdomain.example/terms")
+                            }
+                            LabeledButton(title: "Privacy Policy", systemImage: "lock.shield") {
+                                openURLString("https://yourdomain.example/privacy")
+                            }
+                            LabeledButton(title: "Report a Bug", systemImage: "ladybug") {
+                                openURLString("https://yourdomain.example/support/bug")
+                            }
+                            LabeledButton(title: "Request a Feature", systemImage: "sparkles") {
+                                openURLString("https://yourdomain.example/support/feature")
+                            }
+                            LabeledButton(title: "Leave a Review", systemImage: "star.bubble") {
+                                requestReview()
+                            }
                         }
 
                         Section {
@@ -144,10 +158,7 @@ struct SettingsView: View {
                         }
                     }
                     .scrollContentBackground(.hidden)
-                    .background(
-                        LinearGradient(colors: [.blue.opacity(0.25), .purple.opacity(0.25)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                            .ignoresSafeArea()
-                    )
+                    .background(gradientBackground)
                 } else {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -156,6 +167,16 @@ struct SettingsView: View {
             .navigationTitle("Settings")
         }
         .onAppear(perform: ensureSettings)
+    }
+
+    @Environment(\.colorScheme) private var colorScheme
+    private var gradientBackground: some View {
+        let theme = settingsList.first?.accentTheme ?? .blue
+        let colors = theme.gradientColors(for: colorScheme)
+        let themeKey = theme.rawValue + (colorScheme == .dark ? "_d" : "_l")
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+            .ignoresSafeArea()
+            .animation(.easeInOut(duration: 0.35), value: themeKey)
     }
 
     // MARK: - Helpers
@@ -197,6 +218,26 @@ struct SettingsView: View {
         let created = AppSettings()
         modelContext.insert(created)
         settings = created
+    }
+}
+
+private struct LabeledButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: systemImage)
+                    .foregroundStyle(.secondary)
+                Text(title)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.subheadline)
+                    .foregroundStyle(.tertiary)
+            }
+        }
     }
 }
 

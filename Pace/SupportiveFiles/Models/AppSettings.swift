@@ -99,6 +99,34 @@ final class AppSettings {
             case .mint: return .mint
             }
         }
+
+        func gradientColors(for colorScheme: ColorScheme) -> [Color] {
+            // Subtle paired gradients by theme; balanced for light/dark
+            let opacityTop: Double = colorScheme == .dark ? 0.20 : 0.16
+            let opacityBottom: Double = colorScheme == .dark ? 0.24 : 0.18
+            switch self {
+            case .blue:
+                return [Color.blue.opacity(opacityTop), Color.purple.opacity(opacityBottom)]
+            case .purple:
+                return [Color.purple.opacity(opacityTop), Color.indigo.opacity(opacityBottom)]
+            case .pink:
+                return [Color.pink.opacity(opacityTop), Color.purple.opacity(opacityBottom)]
+            case .orange:
+                return [Color.orange.opacity(opacityTop), Color.red.opacity(opacityBottom)]
+            case .red:
+                return [Color.red.opacity(opacityTop), Color.pink.opacity(opacityBottom)]
+            case .green:
+                return [Color.green.opacity(opacityTop), Color.teal.opacity(opacityBottom)]
+            case .teal:
+                return [Color.teal.opacity(opacityTop), Color.blue.opacity(opacityBottom)]
+            case .indigo:
+                return [Color.indigo.opacity(opacityTop), Color.blue.opacity(opacityBottom)]
+            case .yellow:
+                return [Color.yellow.opacity(colorScheme == .dark ? 0.18 : 0.12), Color.orange.opacity(opacityBottom)]
+            case .mint:
+                return [Color.mint.opacity(opacityTop), Color.teal.opacity(opacityBottom)]
+            }
+        }
     }
 
     var accentTheme: ThemeColor {

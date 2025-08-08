@@ -22,28 +22,21 @@ private struct Root: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var settingsList: [AppSettings]
 
-    @State private var settings: AppSettings? = nil
-
     var body: some View {
-        Group {
-            if let settings {
-                ContentView()
-                    .tint(settings.accentSwiftUIColor)
-            } else {
-                ContentView()
-                    .task { ensureSettings() }
-            }
-        }
-        .onAppear { ensureSettings() }
+        let accentKey = settingsList.first?.accentTheme.rawValue ?? "blue"
+        let accentColor = settingsList.first?.accentSwiftUIColor ?? .blue
+
+        return ContentView()
+            .tint(accentColor)
+            .animation(.easeInOut(duration: 0.35), value: accentKey)
+            .task { ensureSettings() }
+            .onAppear { ensureSettings() }
     }
 
     private func ensureSettings() {
-        if let existing = settingsList.first {
-            settings = existing
-        } else {
+        if settingsList.first == nil {
             let created = AppSettings()
             modelContext.insert(created)
-            settings = created
         }
     }
 }
