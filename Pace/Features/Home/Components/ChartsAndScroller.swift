@@ -16,7 +16,7 @@ struct HourlyChart: View {
                 .foregroundStyle(.secondary)
                 .cornerRadius(2)
         }
-        .frame(height: 130)
+        .frame(height: 180)
         .padding(.horizontal)
     }
 }

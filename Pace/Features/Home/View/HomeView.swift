@@ -16,8 +16,21 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
+        VStack {
+            VStack(spacing: 10) {
+                HStack {
+                    Text("Steps")
+                        .font(.title)
+                        .bold()
+                    Spacer()
+                    Button {
+                        isShowingSettings = true
+                    } label: {
+                        Image(systemName: "gear")
+                    }
+                    .buttonStyle(.glass)
+                }
+                .padding()
                 GlassCard(
                     accent: settingsList.first?.accentSwiftUIColor ?? .blue,
                     progress: viewModel.progressFraction(goal: currentGoal),
@@ -69,19 +82,10 @@ struct HomeView: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(gradientBackground)
-            .navigationTitle("Steps")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isShowingSettings = true
-                    } label: {
-                        Image(systemName: "gear")
-                    }
-                }
-            }
+          Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(gradientBackground)
         .task { await viewModel.onAppear() }
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()

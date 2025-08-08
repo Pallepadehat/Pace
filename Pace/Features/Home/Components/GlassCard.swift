@@ -22,6 +22,8 @@ struct GlassCard<Content: View>: View {
         self.refresh = refresh
     }
 
+    @State private var revealedProgress: CGFloat = 0
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             let cornerRadius: CGFloat = 28
@@ -38,27 +40,46 @@ struct GlassCard<Content: View>: View {
                 )
                 // Progress stroke on top
                 .overlay(alignment: .center) {
-                    let lineWidth: CGFloat = 6
-                    baseShape
-                        .inset(by: lineWidth / 2)
-                        .trim(from: 0, to: max(0.001, min(progress, 0.999)))
-                        .stroke(
-                            AngularGradient(
-                                gradient: Gradient(colors: [accent.opacity(0.95), accent.opacity(0.55), accent.opacity(0.95)]),
-                                center: .center
-                            ),
-                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                        .shadow(color: accent.opacity(0.45), radius: 12, x: 0, y: 0)
-                        .animation(.easeInOut(duration: 0.4), value: progress)
+                    if !isLoading && progress > 0.001 {
+                        let lineWidth: CGFloat = 6
+                        ZStack {
+                            // Main progress ring
+                            baseShape
+                                .inset(by: lineWidth / 2)
+                                .trim(from: 0, to: max(0.001, min(revealedProgress, 0.999)))
+                                .stroke(
+                                    AngularGradient(
+                                        gradient: Gradient(colors: [accent.opacity(0.95), accent.opacity(0.55), accent.opacity(0.95)]),
+                                        center: .center
+                                    ),
+                                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                                )
+                                .rotationEffect(.degrees(-90))
+                                .shadow(color: accent.opacity(0.45), radius: 12, x: 0, y: 0)
+
+                            // Saber tip glow
+                            baseShape
+                                .inset(by: lineWidth / 2)
+                                .trim(from: max(0.0, revealedProgress - 0.02), to: min(1.0, revealedProgress))
+                                .stroke(
+                                    LinearGradient(colors: [accent.opacity(0.2), accent.opacity(0.9), accent.opacity(0.2)], startPoint: .leading, endPoint: .trailing),
+                                    style: StrokeStyle(lineWidth: lineWidth + 4, lineCap: .round)
+                                )
+                                .rotationEffect(.degrees(-90))
+                                .blur(radius: 2)
+                                .opacity(revealedProgress > 0 ? 1 : 0)
+                        }
+                        .animation(.easeInOut(duration: 0.5), value: revealedProgress)
+                    }
                 }
                 // Soft outer glow for depth
                 .overlay {
-                    baseShape
-                        .stroke(accent.opacity(0.10), lineWidth: 10)
-                        .blur(radius: 14)
-                        .opacity(min(1, Double(progress)))
+                    if !isLoading && progress > 0.001 {
+                        baseShape
+                            .stroke(accent.opacity(0.10), lineWidth: 10)
+                            .blur(radius: 14)
+                            .opacity(min(1, Double(revealedProgress)))
+                    }
                 }
 
             Button(action: { Task { await refresh() } }) {
@@ -78,6 +99,17 @@ struct GlassCard<Content: View>: View {
         .padding(.horizontal)
         .frame(maxWidth: .infinity)
         .frame(height: 360)
+        .onAppear { animateReveal() }
+        .onChange(of: progress) { animateReveal() }
+        .onChange(of: isLoading) { animateReveal() }
+    }
+
+    private func animateReveal() {
+        if isLoading || progress <= 0.001 {
+            withAnimation(.easeInOut(duration: 0.25)) { revealedProgress = 0 }
+        } else {
+            withAnimation(.easeInOut(duration: 0.55)) { revealedProgress = progress }
+        }
     }
 }
 
