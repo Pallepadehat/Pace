@@ -101,6 +101,7 @@ struct SettingsView: View {
                                     withAnimation(.easeInOut(duration: 0.35)) {
                                         settings.accentTheme = newTheme
                                     }
+                                    try? modelContext.save()
                                 }
                             )) {
                                 ForEach(AppSettings.ThemeColor.allCases) { theme in
