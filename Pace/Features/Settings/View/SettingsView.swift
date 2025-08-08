@@ -53,7 +53,7 @@ struct SettingsView: View {
                                 get: { settings.dailyStepGoal },
                                 set: { newValue in
                                     settings.dailyStepGoal = max(1000, min(newValue, 50000))
-                                    if settings.hapticsEnabled { Haptics.playSuccess() }
+                                    Haptics.playSuccess()
                                     persist()
                                 }
                             ), in: 1000...50000, step: 500) {
@@ -76,25 +76,6 @@ struct SettingsView: View {
                                     Text(unit.displayName).tag(unit)
                                 }
                             }
-                        }
-
-                        Section(header: Text("Experience")) {
-                            Toggle("Animations", isOn: Binding(
-                                get: { settings.animationsEnabled },
-                                set: { settings.animationsEnabled = $0; persist() }
-                            ))
-                            Toggle("Haptics", isOn: Binding(
-                                get: { settings.hapticsEnabled },
-                                set: { settings.hapticsEnabled = $0; persist() }
-                            ))
-                            Toggle("Dynamic background", isOn: Binding(
-                                get: { settings.dynamicBackgroundEnabled },
-                                set: { settings.dynamicBackgroundEnabled = $0; persist() }
-                            ))
-                            Toggle("Ambient edge progress", isOn: Binding(
-                                get: { settings.ambientEdgeProgressEnabled },
-                                set: { settings.ambientEdgeProgressEnabled = $0; persist() }
-                            ))
                         }
 
                         Section(header: Text("Theme")) {

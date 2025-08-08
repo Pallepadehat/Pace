@@ -17,7 +17,7 @@ struct HomeView: View {
 
     var body: some View {
         VStack {
-            VStack(spacing: 10) {
+            VStack(spacing: 24) {
                 HStack {
                     Text("Steps")
                         .font(.title)

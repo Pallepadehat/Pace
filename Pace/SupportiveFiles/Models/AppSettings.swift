@@ -15,10 +15,6 @@ final class AppSettings {
     var isHealthKitEnabled: Bool
     var dailyStepGoal: Int
     var distanceUnitRawValue: String
-    var animationsEnabled: Bool
-    var hapticsEnabled: Bool
-    var dynamicBackgroundEnabled: Bool
-    var ambientEdgeProgressEnabled: Bool
     var showCalories: Bool
     var showActiveMinutes: Bool
     var accentColorRawValue: String
@@ -27,10 +23,6 @@ final class AppSettings {
         isHealthKitEnabled: Bool = false,
         dailyStepGoal: Int = 8000,
         distanceUnit: DistanceUnit = .metric,
-        animationsEnabled: Bool = true,
-        hapticsEnabled: Bool = true,
-        dynamicBackgroundEnabled: Bool = true,
-        ambientEdgeProgressEnabled: Bool = true,
         showCalories: Bool = true,
         showActiveMinutes: Bool = true,
         accentColor: ThemeColor = .blue
@@ -38,10 +30,6 @@ final class AppSettings {
         self.isHealthKitEnabled = isHealthKitEnabled
         self.dailyStepGoal = dailyStepGoal
         self.distanceUnitRawValue = distanceUnit.rawValue
-        self.animationsEnabled = animationsEnabled
-        self.hapticsEnabled = hapticsEnabled
-        self.dynamicBackgroundEnabled = dynamicBackgroundEnabled
-        self.ambientEdgeProgressEnabled = ambientEdgeProgressEnabled
         self.showCalories = showCalories
         self.showActiveMinutes = showActiveMinutes
         self.accentColorRawValue = accentColor.rawValue
